@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country RESTApi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='img/bandera.ico') }}"
+    />
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h1 class="title">Country RESTApi</h1>
+            
+            {% if not country_info %}
+                <form method="POST" action="{{ url_for('home') }}" class="search-form">
+                    <input type="text" id="country-search" name="country_name" placeholder="Start typing country name" autocomplete="off" required>
+                    <div id="suggestions" class="suggestions"></div>
+                    <button type="submit">Search</button>
+                </form>
+            {% else %}
+                <div class="card">
+                    <h2 class="country-name">{{ country_info.country }}</h2>
+                    <div class="card-content">
+                        <img src="{{ country_info.flag }}" alt="Flag of {{ country_info.country }}" class="flag">
+                        <div class="info">
+                            <p><strong>Capital:</strong> {{ country_info.capital }}</p>
+                            <p><strong>Region:</strong> {{ country_info.region }}</p>
+                            <p><strong>Population:</strong> {{ country_info.population }}</p>
+                            <p><strong>Currency:</strong> {{ country_info.currencie }} ({{ country_info.currencie_symbol }})</p>
+                            <p><strong>Domain:</strong> {{ country_info.domain }}</p>
+                            <p><strong>Languages:</strong> {{ country_info.languages | join(', ') }}</p>
+                            <p><strong>Timezone:</strong> {{ country_info.timezone }}</p>
+                            <p><strong>Coordinates:</strong> Latitude {{ country_info.latitude }}, Longitude {{ country_info.longitude }}</p>
+                            <p><strong>Independent:</strong> {{ 'Yes' if country_info.independent else 'No' }}</p>
+                            <p><strong>Prefix:</strong> {{ country_info.prefix }}</p>
+                            <p><strong>Start of Week:</strong> {{ country_info.startOfWeek }}</p>
+                            <a href="{{ country_info.maps }}" target="_blank" class="map-link">View on Google Maps</a>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('home') }}" class="back-link">Search Again</a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <footer>
+            <p>&copy; Developed, Victor Apolinares. <strong>API: REST Countries</strong></p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const countries = {{ countries|tojson }};
+            const input = document.getElementById("country-search");
+            const suggestionsBox = document.getElementById("suggestions");
+        
+            input.addEventListener("input", function() {
+                const query = input.value.toLowerCase();
+                suggestionsBox.innerHTML = ""; // Limpiar las sugerencias anteriores
+        
+                if (query.length > 0) {
+                    const filteredCountries = countries.filter(country => country.toLowerCase().includes(query));
+                    
+                    filteredCountries.forEach(country => {
+                        const suggestion = document.createElement("div");
+                        suggestion.classList.add("suggestion-item");
+                        suggestion.textContent = country;
+                        suggestion.addEventListener("click", function() {
+                            input.value = country;
+                            suggestionsBox.innerHTML = ""; // Limpiar sugerencias
+                        });
+                        suggestionsBox.appendChild(suggestion);
+                    });
+                }
+            });
+        
+            // Cierra las sugerencias si el usuario hace clic fuera del cuadro de búsqueda
+            document.addEventListener("click", function(e) {
+                if (!input.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    suggestionsBox.innerHTML = ""; // Limpiar sugerencias
+                }
+            });
+        });
+    </script>
+</body>
+</html>
